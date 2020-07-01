@@ -6,6 +6,7 @@ from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.text import tokenizer_from_json
+import re
 
 
 def generate_padded_sequences(input_sequences, max_sequence_len=0):
@@ -50,7 +51,7 @@ def get_sequence_of_tokens(corpus, refresh=True):
     return total_words, seq
 
 
-def train(model, inputs, target, model_path):
+def train(model, inputs, target, model_path, epochs):
 
     x = inputs
     y = target
@@ -60,7 +61,7 @@ def train(model, inputs, target, model_path):
     model.fit(
         x, y,
         batch_size=64,
-        epochs=10,
+        epochs=epochs,
         verbose=1,
         validation_split=0,
         shuffle=True,
@@ -92,6 +93,16 @@ def predict(df_test, model_path):
     df_test["target"] = predict_list
 
     return df_test
+
+
+def clean_text(texts):
+    alpha_num_values = re.compile(r'([a-z]*[0-9]+)+')
+
+    texts = [re.sub("@[\w]+ |http[:\/\w\.]+", "", i) for i in texts]
+
+    texts = [re.sub(alpha_num_values, '', i) for i in texts]
+
+    return texts
 
 
 if __name__ == '__main__':
